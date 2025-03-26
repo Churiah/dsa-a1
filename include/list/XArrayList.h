@@ -199,6 +199,16 @@ void XArrayList<T>::copyFrom(const XArrayList<T> &list)
      * Also duplicates user-defined comparison and deletion functions, if applicable.
      */
     // TODO
+    this->capacity = list.capacity;
+    this->count = list.count;
+    this->data = new T[capacity];
+    this->deleteUserData = list.deleteUserData;
+    this->itemEqual = list.itemEqual;
+    for (int i = 0; i < count; i++)
+    {
+        data[i] = list.data[i];
+    }
+
 }
 
 template <class T>
@@ -210,36 +220,86 @@ void XArrayList<T>::removeInternalData()
      * Finally, the dynamic array itself is deallocated from memory.
      */
     // TODO
+    if (deleteUserData)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            deleteUserData(&data[i]);
+        }
+    }
+    else {
+        for (int i = 0; i < count; i++)
+        {
+            delete data[i];
+        }
+    }
+    delete[] data;
 }
 
 template <class T>
 XArrayList<T>::XArrayList(const XArrayList<T> &list)
 {
     // TODO
+    copyFrom(list);
+
 }
 
 template <class T>
 XArrayList<T> &XArrayList<T>::operator=(const XArrayList<T> &list)
 {
     // TODO
+    if (this != &list)
+    {
+        removeInternalData();
+        copyFrom(list);
+    }
 }
 
 template <class T>
 XArrayList<T>::~XArrayList()
 {
     // TODO
+    if (deleteUserData) removeInternalData();
+    else delete[] data;
+    
 }
 
 template <class T>
 void XArrayList<T>::add(T e)
 {
     // TODO
+    if (count == capacity)
+    {
+        ensureCapacity(count + 1);
+    }
+    count++;
+    data[count] = e;
 }
 
 template <class T>
 void XArrayList<T>::add(int index, T e)
 {
     // TODO
+    // Check out of range
+    if (index < 0 || index > count)
+    {
+        throw out_of_range("Index out of range");
+    }
+    // Ensure capacity
+    if (count == capacity)
+    {
+        ensureCapacity(count + 1);
+    }
+    // If index is not the last element
+    if (index < count)
+    {
+        for (int i = count; i > index; i--)
+        {
+            data[i] = data[i - 1];
+        }
+    }
+    data[index] = e;
+    count++;
 }
 
 template <class T>
